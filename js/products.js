@@ -1,4 +1,4 @@
-// Products display and filtering logic (Japanese Version)
+// Products display, subcategory filtering, and interactive comparison logic (Japanese Version)
 document.addEventListener('DOMContentLoaded', () => {
   const productGrid = document.getElementById('product-grid');
   const featuredProductGrid = document.getElementById('featured-product-grid');
@@ -7,12 +7,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterPills = document.querySelectorAll('#filter-pills-container .filter-pill');
   
   let tagPills = [];
+  let subcatPills = [];
   
   let allProducts = [];
   let currentCategory = 'all';
+  let currentSubCategory = 'all';
   let currentTag = 'all';
   let searchQuery = '';
   let currentSort = 'recommended';
+  
+  // Comparison tool state
+  let selectedCompareIds = [];
 
   // Read config
   const siteConfig = window.SITE_CONFIG || {
@@ -30,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(data => {
       allProducts = data;
       
+      // Initialize components
       if (productGrid) {
         initProductCatalog();
       }
@@ -50,9 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-  // 1. Initialize catalog controls
+  // 1. Initialize catalog controls and Compare elements
   function initProductCatalog() {
     tagPills = document.querySelectorAll('#tag-pills-container .filter-pill');
+    
+    // Inject Compare Elements
+    injectCompareElements();
 
     renderProducts();
 
@@ -78,6 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
         filterPills.forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         currentCategory = pill.getAttribute('data-category');
+        currentSubCategory = 'all'; // reset subcategory on main change
+        
+        // Generate subcategories dynamically
+        renderSubcategories();
         renderProducts();
       });
     });
@@ -95,7 +108,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 2. Render landing page featured products
+  // 2. Dynamically render Subcategories bar
+  function renderSubcategories() {
+    const existingBar = document.getElementById('subcat-pills-container');
+    if (existingBar) existingBar.remove();
+
+    if (currentCategory === 'all') return;
+
+    // Filter products in current category to find unique subcategories
+    const relevantProducts = allProducts.filter(p => p.category === currentCategory);
+    
+    // Extract unique subcategories
+    const subcatsMap = {};
+    relevantProducts.forEach(p => {
+      if (p.subCategory) {
+        subcatsMap[p.subCategory] = p.subCategoryName || p.subCategory;
+      }
+    });
+
+    const subcatKeys = Object.keys(subcatsMap);
+    if (subcatKeys.length === 0) return;
+
+    // Create subcategory container
+    const searchFilterSection = document.querySelector('.search-filter-section');
+    if (!searchFilterSection) return;
+
+    const subcatBar = document.createElement('div');
+    subcatBar.id = 'subcat-pills-container';
+    subcatBar.className = 'subcat-bar';
+    
+    let labelText = currentCategory === 'tech' ? 'テック製品すべて' : currentCategory === 'home' ? 'スマートホームすべて' : 'アウトドアすべて';
+    
+    let pillsHtml = `<span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-right: 0.5rem;"><i class="fas fa-sliders-h"></i> サブカテゴリー：</span>`;
+    pillsHtml += `<button class="subcat-pill active" data-subcategory="all">${labelText}</button>`;
+    
+    subcatKeys.forEach(key => {
+      pillsHtml += `<button class="subcat-pill" data-subcategory="${key}">${subcatsMap[key]}</button>`;
+    });
+
+    subcatBar.innerHTML = pillsHtml;
+    searchFilterSection.appendChild(subcatBar);
+
+    // Event listeners
+    subcatPills = subcatBar.querySelectorAll('.subcat-pill');
+    subcatPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        subcatPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentSubCategory = pill.getAttribute('data-subcategory');
+        renderProducts();
+      });
+    });
+  }
+
+  // 3. Render landing page featured products
   function renderFeaturedProducts() {
     const featuredList = allProducts
       .filter(p => p.featured)
@@ -114,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. Filter, Sort and Render
+  // 4. Filter, Sort and Render
   function renderProducts() {
     if (!productGrid) return;
 
@@ -123,6 +189,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Category filter
       const matchCategory = currentCategory === 'all' || product.category === currentCategory;
       
+      // Subcategory filter
+      const matchSubCategory = currentSubCategory === 'all' || product.subCategory === currentSubCategory;
+
       // Tag filter
       const matchTag = currentTag === 'all' || 
         (currentTag === 'bestSeller' && product.bestSeller) ||
@@ -136,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         product.description.toLowerCase().includes(searchQuery) ||
         (product.tags && product.tags.some(tag => tag.toLowerCase().includes(searchQuery)));
         
-      return matchCategory && matchTag && matchSearch;
+      return matchCategory && matchSubCategory && matchTag && matchSearch;
     });
 
     // Sort Logic
@@ -171,9 +240,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const card = createProductCard(product);
       productGrid.appendChild(card);
     });
+
+    // Bind event listeners to comparison checkboxes
+    bindCompareEvents();
   }
 
-  // 4. Create single product card DOM
+  // 5. Create single product card DOM
   function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card';
@@ -246,15 +318,182 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="price-now">${priceText}</span>
             ${hasDiscount ? `<span class="price-original">${originalPriceText}</span>` : ''}
           </div>
-          <div class="product-actions">
+          <div class="product-actions" style="display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch;">
             <a href="${affiliateUrl}" target="_blank" rel="noopener sponsored" class="btn btn-amazon">
               <i class="fab fa-amazon"></i> Amazonでチェック
             </a>
+            <label class="compare-checkbox-container" style="justify-content: center;">
+              <input type="checkbox" class="compare-checkbox" data-compare-id="${product.id}" ${selectedCompareIds.includes(product.id) ? 'checked' : ''}>
+              <span><i class="fas fa-balance-scale"></i> 仕様を比較する</span>
+            </label>
           </div>
         </div>
       </div>
     `;
 
     return card;
+  }
+
+  // --- Comparison Tool Core Code ---
+  
+  // Inject HTML Elements for Compare floating bar and Modal
+  function injectCompareElements() {
+    if (document.getElementById('compare-floating-bar')) return;
+
+    // 1. Floating Bar
+    const floatingBar = document.createElement('div');
+    floatingBar.id = 'compare-floating-bar';
+    floatingBar.className = 'compare-floating-bar';
+    floatingBar.innerHTML = `
+      <span class="compare-bar-text" id="compare-bar-text">0 件の商品が選択されています</span>
+      <button class="btn btn-primary" id="compare-btn" style="padding: 0.5rem 1.25rem; font-size: 0.9rem;">
+        <i class="fas fa-balance-scale"></i> 仕様を比較する
+      </button>
+    `;
+    document.body.appendChild(floatingBar);
+
+    // 2. Modal Overlay
+    const modalOverlay = document.createElement('div');
+    modalOverlay.id = 'compare-modal-overlay';
+    modalOverlay.className = 'compare-modal-overlay';
+    modalOverlay.innerHTML = `
+      <div class="compare-modal">
+        <div class="compare-modal-header">
+          <span class="compare-modal-title"><i class="fas fa-balance-scale"></i> 製品仕様の比較</span>
+          <button class="compare-close-btn" id="compare-close-btn">&times;</button>
+        </div>
+        <div class="compare-modal-body" id="compare-modal-body">
+          <!-- Comparison table rendered here -->
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modalOverlay);
+
+    // Event listeners
+    document.getElementById('compare-close-btn').addEventListener('click', closeCompareModal);
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeCompareModal();
+    });
+    
+    document.getElementById('compare-btn').addEventListener('click', openCompareModal);
+  }
+
+  function bindCompareEvents() {
+    const checkboxes = document.querySelectorAll('.compare-checkbox');
+    checkboxes.forEach(box => {
+      box.addEventListener('change', (e) => {
+        const id = box.getAttribute('data-compare-id');
+        if (box.checked) {
+          if (selectedCompareIds.length >= 3) {
+            alert("一度に比較できる商品は3つまでです！");
+            box.checked = false;
+            return;
+          }
+          if (!selectedCompareIds.includes(id)) {
+            selectedCompareIds.push(id);
+          }
+        } else {
+          selectedCompareIds = selectedCompareIds.filter(item => item !== id);
+        }
+        updateCompareFloatingBar();
+      });
+    });
+  }
+
+  function updateCompareFloatingBar() {
+    const bar = document.getElementById('compare-floating-bar');
+    const textEl = document.getElementById('compare-bar-text');
+    
+    if (selectedCompareIds.length > 0) {
+      textEl.textContent = `${selectedCompareIds.length} 件の商品が選択されています`;
+      bar.classList.add('active');
+    } else {
+      bar.classList.remove('active');
+    }
+  }
+
+  function openCompareModal() {
+    if (selectedCompareIds.length === 0) return;
+    
+    const bodyEl = document.getElementById('compare-modal-body');
+    const overlay = document.getElementById('compare-modal-overlay');
+    
+    const productsToCompare = allProducts.filter(p => selectedCompareIds.includes(p.id));
+    
+    let tableHtml = `<table class="compare-table">`;
+    
+    // 1. Header row
+    tableHtml += `<thead><tr><th>仕様と特徴</th>`;
+    productsToCompare.forEach(p => {
+      const isYen = p.price > 1000;
+      const priceText = isYen ? `¥${p.price.toLocaleString()}` : `$${p.price.toFixed(2)}`;
+      const affiliateUrl = formatAmazonUrl(p.amazonUrl || `https://www.amazon.co.jp/dp/`, siteConfig.amazonId);
+
+      tableHtml += `
+        <td>
+          <div class="compare-product-header">
+            <img src="${p.image}" class="compare-img" alt="${p.title}">
+            <span class="compare-title">${p.title}</span>
+            <span class="compare-price">${priceText}</span>
+            <a href="${affiliateUrl}" target="_blank" rel="noopener sponsored" class="btn btn-amazon" style="font-size:0.8rem; padding:0.4rem 0.8rem;">
+              <i class="fab fa-amazon"></i> Amazonで見る
+            </a>
+          </div>
+        </td>
+      `;
+    });
+    tableHtml += `</tr></thead><tbody>`;
+    
+    // 2. Ratings Row
+    tableHtml += `<tr><th>カスタマー評価</th>`;
+    productsToCompare.forEach(p => {
+      tableHtml += `<td><strong>⭐ ${p.rating} / 5.0</strong> (${p.reviewsCount.toLocaleString()} 件の評価)</td>`;
+    });
+    tableHtml += `</tr>`;
+
+    // 3. Category & Badges Row
+    tableHtml += `<tr><th>バッジ・タグ</th>`;
+    productsToCompare.forEach(p => {
+      const badge = p.bestSeller ? '🔥 ベストセラー' : p.topRated ? '⭐ 大好評' : p.budgetPick ? '🏷️ コスパ最強' : '標準';
+      tableHtml += `<td><span class="meta-tag">${badge}</span></td>`;
+    });
+    tableHtml += `</tr>`;
+
+    // 4. Gather all unique specifications keys
+    const specKeys = {};
+    productsToCompare.forEach(p => {
+      if (p.specs) {
+        Object.keys(p.specs).forEach(k => { specKeys[k] = true; });
+      }
+    });
+
+    const allKeys = Object.keys(specKeys);
+    if (allKeys.length > 0) {
+      allKeys.forEach(k => {
+        tableHtml += `<tr><th>${k}</th>`;
+        productsToCompare.forEach(p => {
+          const specVal = p.specs && p.specs[k] ? p.specs[k] : 'なし';
+          tableHtml += `<td>${specVal}</td>`;
+        });
+        tableHtml += `</tr>`;
+      });
+    }
+
+    // 5. Description Row
+    tableHtml += `<tr><th>商品の概要</th>`;
+    productsToCompare.forEach(p => {
+      tableHtml += `<td><p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5;">${p.description}</p></td>`;
+    });
+    tableHtml += `</tr>`;
+
+    tableHtml += `</tbody></table>`;
+    
+    bodyEl.innerHTML = tableHtml;
+    overlay.classList.add('active');
+  }
+
+  function closeCompareModal() {
+    const overlay = document.getElementById('compare-modal-overlay');
+    overlay.classList.remove('active');
   }
 });
