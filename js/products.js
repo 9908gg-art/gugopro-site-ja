@@ -1,22 +1,25 @@
-// 產品展示與過濾邏輯
+// Products display and filtering logic (Japanese Version)
 document.addEventListener('DOMContentLoaded', () => {
   const productGrid = document.getElementById('product-grid');
   const featuredProductGrid = document.getElementById('featured-product-grid');
   const searchInput = document.getElementById('search-input');
   const sortSelect = document.getElementById('sort-select');
-  const filterPills = document.querySelectorAll('.filter-pill');
-
+  const filterPills = document.querySelectorAll('#filter-pills-container .filter-pill');
+  
+  let tagPills = [];
+  
   let allProducts = [];
   let currentCategory = 'all';
+  let currentTag = 'all';
   let searchQuery = '';
   let currentSort = 'recommended';
 
-  // 讀取配置
+  // Read config
   const siteConfig = window.SITE_CONFIG || {
-    amazonId: '9908qq-20'
+    amazonId: '9908qq-22'
   };
 
-  // 獲取數據
+  // Fetch products
   fetch('data/products.json')
     .then(response => {
       if (!response.ok) {
@@ -27,34 +30,33 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(data => {
       allProducts = data;
       
-      // 判斷是首頁還是產品列表頁
       if (productGrid) {
-        // 產品列表頁邏輯
         initProductCatalog();
       }
       
       if (featuredProductGrid) {
-        // 首頁精選邏輯
         renderFeaturedProducts();
       }
     })
     .catch(error => {
-      console.error('載入商品資料失敗:', error);
+      console.error('Failed to load products:', error);
       if (productGrid) {
         productGrid.innerHTML = `
           <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
             <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--star-color); margin-bottom: 1rem;"></i>
-            <p>商品載入中或載入失敗，請確認 JSON 路徑是否正確。</p>
+            <p>商品の読み込みに失敗しました。JSONファイルを確認してください。</p>
           </div>
         `;
       }
     });
 
-  // 1. 初始化產品目錄頁面
+  // 1. Initialize catalog controls
   function initProductCatalog() {
+    tagPills = document.querySelectorAll('#tag-pills-container .filter-pill');
+
     renderProducts();
 
-    // 搜尋輸入監聽
+    // Search input
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value.toLowerCase().trim();
@@ -62,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // 排序選擇監聽
+    // Sort selection
     if (sortSelect) {
       sortSelect.addEventListener('change', (e) => {
         currentSort = e.target.value;
@@ -70,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // 分類按鈕監聽
+    // Category pills
     filterPills.forEach(pill => {
       pill.addEventListener('click', () => {
         filterPills.forEach(p => p.classList.remove('active'));
@@ -79,19 +81,30 @@ document.addEventListener('DOMContentLoaded', () => {
         renderProducts();
       });
     });
+
+    // Tag pills
+    if (tagPills.length > 0) {
+      tagPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          tagPills.forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          currentTag = pill.getAttribute('data-tag');
+          renderProducts();
+        });
+      });
+    }
   }
 
-  // 2. 渲染首頁精選商品
+  // 2. Render landing page featured products
   function renderFeaturedProducts() {
-    // 篩選出 featured 或 hot 商品，最多顯示 4 個
     const featuredList = allProducts
-      .filter(p => p.featured || p.hot)
+      .filter(p => p.featured)
       .slice(0, 4);
 
     featuredProductGrid.innerHTML = '';
     
     if (featuredList.length === 0) {
-      featuredProductGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">暫無精選推薦</p>';
+      featuredProductGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">おすすめ商品が見つかりません。</p>';
       return;
     }
 
@@ -101,26 +114,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. 篩選與排序並渲染所有商品
+  // 3. Filter, Sort and Render
   function renderProducts() {
     if (!productGrid) return;
 
-    // 篩選邏輯
+    // Filter Logic
     let filtered = allProducts.filter(product => {
-      // 分類過濾
+      // Category filter
       const matchCategory = currentCategory === 'all' || product.category === currentCategory;
       
-      // 關鍵字搜尋（標題、英文標題、敘述、標籤）
+      // Tag filter
+      const matchTag = currentTag === 'all' || 
+        (currentTag === 'bestSeller' && product.bestSeller) ||
+        (currentTag === 'topRated' && product.topRated) ||
+        (currentTag === 'budgetPick' && product.budgetPick);
+
+      // Search keyword filter
       const matchSearch = searchQuery === '' || 
         product.title.toLowerCase().includes(searchQuery) ||
         (product.englishTitle && product.englishTitle.toLowerCase().includes(searchQuery)) ||
         product.description.toLowerCase().includes(searchQuery) ||
         (product.tags && product.tags.some(tag => tag.toLowerCase().includes(searchQuery)));
         
-      return matchCategory && matchSearch;
+      return matchCategory && matchTag && matchSearch;
     });
 
-    // 排序邏輯
+    // Sort Logic
     if (currentSort === 'price-asc') {
       filtered.sort((a, b) => a.price - b.price);
     } else if (currentSort === 'price-desc') {
@@ -128,10 +147,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (currentSort === 'rating') {
       filtered.sort((a, b) => b.rating - a.rating);
     } else {
-      // 預設推薦：將 featured/hot 靠前
       filtered.sort((a, b) => {
-        const valA = (a.featured ? 2 : 0) + (a.hot ? 1 : 0);
-        const valB = (b.featured ? 2 : 0) + (b.hot ? 1 : 0);
+        const valA = (a.bestSeller ? 3 : 0) + (a.featured ? 2 : 0) + (a.topRated ? 1 : 0);
+        const valB = (b.bestSeller ? 3 : 0) + (b.featured ? 2 : 0) + (b.topRated ? 1 : 0);
         return valB - valA;
       });
     }
@@ -142,8 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
       productGrid.innerHTML = `
         <div style="grid-column: 1/-1; text-align: center; padding: 4rem 1rem; color: var(--text-secondary);">
           <i class="fas fa-search-minus" style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-muted);"></i>
-          <p style="font-size: 1.1rem; font-weight: 500;">找不到符合條件的商品</p>
-          <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem;">試試更換關鍵字或重設分類篩選。</p>
+          <p style="font-size: 1.1rem; font-weight: 500;">条件に合う商品が見つかりません</p>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem;">キーワードを変更するか、フィルターをリセットしてください。</p>
         </div>
       `;
       return;
@@ -155,21 +173,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. 創建單個產品卡片 DOM
+  // 4. Create single product card DOM
   function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card';
     
-    // 聯盟連結轉換
-    const affiliateUrl = formatAmazonUrl(product.amazonUrl || `https://www.amazon.com/dp/`, siteConfig.amazonId);
+    const affiliateUrl = formatAmazonUrl(product.amazonUrl || `https://www.amazon.co.jp/dp/`, siteConfig.amazonId);
     
-    // 原價折舊折扣標記
+    // Discount percentage
     const hasDiscount = product.originalPrice && product.originalPrice > product.price;
     const discountPercent = hasDiscount ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
     
-    // 評分星星生成
+    // Star rating rendering
     let starsHtml = '';
-    const roundedRating = Math.round(product.rating * 2) / 2; // 四捨五入到 0.5
+    const roundedRating = Math.round(product.rating * 2) / 2;
     for (let i = 1; i <= 5; i++) {
       if (i <= roundedRating) {
         starsHtml += '<i class="fas fa-star"></i>';
@@ -180,14 +197,36 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 標籤 tags HTML
+    // Top Left Badge Logic
+    let topLeftBadge = '';
+    if (product.bestSeller) {
+      topLeftBadge = `<span class="badge-bestseller"><i class="fas fa-crown"></i> ベストセラー</span>`;
+    } else if (product.topRated) {
+      topLeftBadge = `<span class="badge-toprated"><i class="fas fa-award"></i> 大好評</span>`;
+    } else if (product.budgetPick) {
+      topLeftBadge = `<span class="badge-budget"><i class="fas fa-tag"></i> コスパ最強</span>`;
+    }
+
+    // Top Right Badge Logic
+    let topRightBadge = '';
+    if (hasDiscount) {
+      topRightBadge = `<span class="badge-deal">${discountPercent}% OFF</span>`;
+    } else if (product.hot) {
+      topRightBadge = `<span class="badge-hot"><i class="fas fa-fire"></i> HOT</span>`;
+    }
+
     const tagsHtml = product.tags ? product.tags.map(tag => `<span class="meta-tag">#${tag}</span>`).join('') : '';
+
+    // Price formatting (check if Yen or USD)
+    const isYen = product.price > 1000;
+    const priceText = isYen ? `¥${product.price.toLocaleString()}` : `$${product.price.toFixed(2)}`;
+    const originalPriceText = hasDiscount ? (isYen ? `¥${product.originalPrice.toLocaleString()}` : `$${product.originalPrice.toFixed(2)}`) : '';
 
     card.innerHTML = `
       <div class="product-image-container">
         <img src="${product.image}" alt="${product.title}" loading="lazy">
-        ${hasDiscount ? `<span class="badge-deal">省 ${discountPercent}%</span>` : ''}
-        ${product.hot ? `<span class="badge-hot"><i class="fas fa-fire"></i> HOT</span>` : ''}
+        ${topLeftBadge}
+        ${topRightBadge}
       </div>
       <div class="product-info">
         <span class="product-category">${product.categoryName}</span>
@@ -204,12 +243,12 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="product-footer">
           <div class="product-price">
-            <span class="price-now">$${product.price.toFixed(2)}</span>
-            ${hasDiscount ? `<span class="price-original">$${product.originalPrice.toFixed(2)}</span>` : ''}
+            <span class="price-now">${priceText}</span>
+            ${hasDiscount ? `<span class="price-original">${originalPriceText}</span>` : ''}
           </div>
           <div class="product-actions">
             <a href="${affiliateUrl}" target="_blank" rel="noopener sponsored" class="btn btn-amazon">
-              <i class="fab fa-amazon"></i> 亞馬遜購買
+              <i class="fab fa-amazon"></i> Amazonでチェック
             </a>
           </div>
         </div>

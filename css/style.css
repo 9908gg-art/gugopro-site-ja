@@ -552,6 +552,7 @@ nav ul li a:hover::after, nav ul li a.active::after {
   font-size: 0.75rem;
   font-weight: 700;
   box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+  z-index: 10;
 }
 
 .badge-hot {
@@ -564,6 +565,49 @@ nav ul li a:hover::after, nav ul li a.active::after {
   border-radius: 0.5rem;
   font-size: 0.75rem;
   font-weight: 700;
+  z-index: 10;
+}
+
+.badge-bestseller {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 4px 6px rgba(139, 92, 246, 0.3);
+  z-index: 10;
+}
+
+.badge-budget {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background-color: #10b981;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+  z-index: 10;
+}
+
+.badge-toprated {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background-color: #f59e0b;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+  z-index: 10;
 }
 
 .product-info {
