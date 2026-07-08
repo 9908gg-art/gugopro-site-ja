@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     card.innerHTML = `
       <div class="product-image-container">
-        <img src="${product.image}" alt="${product.title}" loading="lazy">
+        <img src="${product.image}" alt="${product.title}" loading="lazy" onerror="this.onerror=null; this.src='${product.category === 'tech' ? 'images/keyboard.jpg' : product.category === 'home' ? 'images/chair.jpg' : 'images/blog-smarthome.jpg'}';">
         ${topLeftBadge}
         ${topRightBadge}
       </div>
@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tableHtml += `
         <td>
           <div class="compare-product-header">
-            <img src="${p.image}" class="compare-img" alt="${p.title}">
+            <img src="${p.image}" class="compare-img" alt="${p.title}" onerror="this.onerror=null; this.src='${p.category === 'tech' ? 'images/keyboard.jpg' : p.category === 'home' ? 'images/chair.jpg' : 'images/blog-smarthome.jpg'}';">
             <span class="compare-title">${p.title}</span>
             <span class="compare-price">${priceText}</span>
             <a href="${affiliateUrl}" target="_blank" rel="noopener sponsored" class="btn btn-amazon" style="font-size:0.8rem; padding:0.4rem 0.8rem;">
