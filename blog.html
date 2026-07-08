@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>購入ガイド＆レビュー | GuGoPro JP アマゾン情報局</title>
+  <meta name="description" content="GuGoPro JPの最新購入ガイドと製品レビューです。メカニカルキーボード、ノイズキャンセリングヘッドホン、オフィスチェアなどの比較・選び方を詳しく解説。">
+  <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%232563eb%22/><text y=%2270%22 x=%2222%22 fill=%22white%22 font-family=%22Outfit%22 font-size=%2260%22 font-weight=%22bold%22>G</text></svg>">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Sticky Header -->
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">G</span> GuGoPro JP
+      </a>
+      
+      <nav id="nav-menu">
+        <ul>
+          <li><a href="index.html">ホーム</a></li>
+          <li><a href="products.html">おすすめ商品</a></li>
+          <li><a href="blog.html" class="active">購入ガイド</a></li>
+          <li><a href="about.html">運営者・免責</a></li>
+        </ul>
+      </nav>
+      
+      <div class="nav-controls">
+        <button id="theme-toggle" class="theme-toggle-btn" title="ダーク/ライトモード切替" aria-label="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button id="mobile-menu-btn" class="mobile-menu-btn" title="メニューを開く" aria-label="Toggle Menu">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Header -->
+  <section class="hero" style="padding: 8rem 2rem 4rem;">
+    <div class="hero-content">
+      <h1>購入ガイド＆徹底レビュー</h1>
+      <p>編集部が中立的な視点で作成した選定ノウハウ、実機比較レビュー、スマートライフのヒントをお届けします。無駄な買い物を防ぎ、最適な予算配分をサポートします。</p>
+    </div>
+  </section>
+
+  <!-- Blog Listing Section -->
+  <main class="section" style="padding-top: 1rem;">
+    <div id="blog-grid" class="blog-grid">
+      <!-- Blog posts loaded dynamically by blog.js -->
+      <div style="grid-column: 1/-1; text-align: center; padding: 4rem;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--accent-color);"></i>
+        <p style="margin-top: 1rem; color: var(--text-secondary);">記事を読み込み中...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Affiliate Disclosure Banner -->
+  <section class="section">
+    <div class="affiliate-disclosure-box">
+      <h4><i class="fas fa-info-circle" style="color: var(--accent-color);"></i> アフィリエイトに関する開示</h4>
+      <p class="dynamic-disclosure">Amazon.co.jpのアソシエイトとして、当メディアは適格販売により収入を得ています。本サイトのリンク経由で商品を購入された場合、紹介料が発生することがありますが、お客様の購入費用に追加されるコストはありません。サイト運営のご支援をお願いいたします。</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-brand">
+        <h3>GuGoPro JP</h3>
+        <p>Amazonアソシエイト公認の厳選レビュー＆紹介サイト。ガジェット周辺機器、エルゴノミクス健康オフィス、暮らしのベストバイをお届けします。</p>
+        <div class="footer-disclosure">
+          <strong>Amazon 免責事項:</strong> <span class="dynamic-disclosure">Amazon.co.jpのアソシエイトとして、当メディアは適格販売により収入を得ています。</span>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>クイックリンク</h4>
+        <ul>
+          <li><a href="index.html">ホーム</a></li>
+          <li><a href="products.html">おすすめ商品</a></li>
+          <li><a href="blog.html">購入ガイド</a></li>
+          <li><a href="about.html">運営者・免責</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>カテゴリー</h4>
+        <ul>
+          <li><a href="products.html?cat=tech" onclick="localStorage.setItem('filterCategory', 'tech')">テック 3Cギア</a></li>
+          <li><a href="products.html?cat=home" onclick="localStorage.setItem('filterCategory', 'home')">スマートオフィス</a></li>
+          <li><a href="products.html?cat=lifestyle" onclick="localStorage.setItem('filterCategory', 'lifestyle')">アウトドア・旅行</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>お問い合わせ</h4>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">ご質問やご提案はこちらへ</p>
+        <p style="font-size: 0.9rem; color: var(--text-secondary);"><i class="far fa-envelope"></i> contact@gugopro.com</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; <span id="copyright-year">2026</span> GuGoPro JP. All rights reserved. GitHub Pagesにてホスト中。</p>
+      <p>
+        <a href="about.html#privacy" style="margin-right: 1rem;">プライバシーポリシー</a>
+        <a href="about.html#terms">免責事項</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scroll to Top Button -->
+  <button id="scroll-top" class="scroll-top-btn" title="トップへ戻る" aria-label="Back to Top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <!-- JavaScript Config & Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/blog.js"></script>
+</body>
+</html>

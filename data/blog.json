@@ -1,0 +1,38 @@
+[
+  {
+    "id": "best-smart-home-2026",
+    "title": "2026年ミニマリストスマートホーム構築：初心者に必要なスマートデバイスと入門ガイド",
+    "summary": "スマートホームを始めたいけれど、どこから手を付ければ良いか分からない？初心者に最適で安定したPhilips Hueなどのスマート照明器具を選定し、快適で便利な空間の作り方をステップバイステップで解説します。",
+    "date": "2026-07-01",
+    "author": "GuGo 編集部",
+    "category": "home",
+    "categoryName": "スマートホーム",
+    "image": "images/blog-smarthome.jpg",
+    "readTime": "読了 5 分",
+    "url": "blog/best-smart-home-2026.html"
+  },
+  {
+    "id": "ergonomic-workplace",
+    "title": "腰痛にサヨナラ！リモートワークを快適にするエルゴノミクスオフィスチェアの選び方",
+    "summary": "毎日パソコンの前で8時間以上座っていませんか？適切なオフィスチェアを選ぶことは、背骨の健康と作業効率の向上に直結します。エルゴノミクスチェアの核心的な選び方と売れ筋チェアを徹底比較レビュー。",
+    "date": "2026-06-25",
+    "author": "Dr. Work",
+    "category": "lifestyle",
+    "categoryName": "ヘルシーオフィス",
+    "image": "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&auto=format&fit=crop&q=60",
+    "readTime": "読了 8 分",
+    "url": "blog/ergonomic-workplace.html"
+  },
+  {
+    "id": "mechanical-keyboard-guide",
+    "title": "メカニカルキーボード入門：赤軸・青軸・茶軸の違いと選び方を徹底解説！",
+    "summary": "普段使っているキーボードの打鍵感が物足りない？それはメカニカルキーボードを体験していないからです！キーボード初心者向けに、スイッチ（軸）の構造や打鍵音、好みの選び方を分かりやすく解説します。",
+    "date": "2026-06-18",
+    "author": "キーボードマニア",
+    "category": "tech",
+    "categoryName": "テック周辺機器",
+    "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=60",
+    "readTime": "読了 6 分",
+    "url": "blog/mechanical-keyboard-guide.html"
+  }
+]
